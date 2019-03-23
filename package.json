@@ -1,12 +1,15 @@
 {
-  "name": "crunchyroll",
-  "version": "1.0.0",
-  "description": "web crawler for crunchyroll",
-  "main": "index.js",
-  "author": "vitorsss",
-  "dependencies": {
-    "request": "^2.88.0"
-  },
+    "name": "crunchyroll",
+    "version": "1.0.0",
+    "description": "web crawler for crunchyroll",
+    "main": "index.js",
+    "author": "vitorsss",
+    "dependencies": {
+        "request": "2.88.0",
+        "unescape": "1.0.1",
+        "chromedriver": "2.46.0",
+        "selenium-webdriver": "3.6.0"
+    },
     "eslintConfig": {
         "env": {
             "node": true,
