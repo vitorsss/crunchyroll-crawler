@@ -45,17 +45,21 @@ function searchUrls(urls, index, callback) {
     driver.getPageSource().then(function (pageSource) {
 
         var vilosConfig = /(vilos.config.media\s*=\s*)+(\{.*\};)/g.exec(pageSource),
+            season = /"season:([^"]*)/g.exec(pageSource)[1].trim(),
             url_parts = urls[index].split('/');
         vilosConfig = vilosConfig[2];
         vilosConfig = JSON.parse(vilosConfig.substring(0, vilosConfig.length - 1));
 
         var masterIndexUrl,
-            dirName = path.join(config.outdir, url_parts[url_parts.length - 2]),
-            fileName = path.join(dirName, url_parts[url_parts.length - 1]).toString();
-
+            dirName = path.join(config.outdir, url_parts[url_parts.length - 2]);
         if (!fs.existsSync(dirName)) {
             fs.mkdirSync(dirName);
         }
+        dirName = path.join(dirName, season);
+        if (!fs.existsSync(dirName)) {
+            fs.mkdirSync(dirName);
+        }
+        var fileName = path.join(dirName, url_parts[url_parts.length - 1]).toString();
 
         vilosConfig.streams.forEach(function (stream) {
             if (stream.hardsub_lang === config.preferedLang) {
