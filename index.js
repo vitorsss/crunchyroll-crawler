@@ -5,8 +5,9 @@ const request = require('request'),
     path = require('path'),
     fs = require('fs'),
     config = require('./config.json'),
+    chrome = require('selenium-webdriver/chrome'),
     {Builder, until} = require('selenium-webdriver'),
-    driver = new Builder().forBrowser('chrome').build(),
+    driver = new Builder().forBrowser('chrome').setChromeOptions(new chrome.Options().headless().windowSize({width: 640, height: 480})).build(),
     mediaUrls = [];
 
 function downloadIndexUrl(indexUrl, metadataFile, fileName, callback) {
