@@ -41,7 +41,7 @@ function searchUrls(driver, urls, index, callback) {
     driver.getPageSource().then(function (pageSource) {
 
         var vilosConfig = /(vilos.config.media\s*=\s*)+(\{.*\};)/g.exec(pageSource),
-            season = /"season:([^"]*)/g.exec(pageSource)[1].trim(),
+            season = /"season:([^"]*)/g.exec(pageSource),
             url_parts = urls[index].split('/');
         vilosConfig = vilosConfig[2];
         vilosConfig = JSON.parse(vilosConfig.substring(0, vilosConfig.length - 1));
@@ -51,7 +51,9 @@ function searchUrls(driver, urls, index, callback) {
         if (!fs.existsSync(dirName)) {
             fs.mkdirSync(dirName);
         }
-        dirName = path.join(dirName, season);
+        if (season && season.length) {
+            dirName = path.join(dirName, season[1].trim());
+        }
         if (!fs.existsSync(dirName)) {
             fs.mkdirSync(dirName);
         }

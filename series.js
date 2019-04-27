@@ -27,6 +27,25 @@ fs.readdirSync(config.outdir).forEach(function (seriesName) {
     findRecursiveEpisodes(series.episodes, path.join(config.outdir, seriesName));
 });
 
+function selectEpisodesElements(seasonElementsToLoad, urls, index, callback) {
+    promise.map(seasonElementsToLoad, e => e.findElements(By.css("a.episode"))).then(function (episodeElementsOfSeasons) {
+        var allEpisodeElements = [];
+        episodeElementsOfSeasons.forEach(function (episodeElements) {
+            allEpisodeElements = allEpisodeElements.concat(episodeElements);
+        });
+        promise.map(allEpisodeElements, e => e.getAttribute('href')).then(function (hrefs) {
+            var url_parts = hrefs[0].split('/'),
+                currSeriesEpisodes = seriesEpisodes[url_parts[url_parts.length - 2]];
+            hrefs.forEach(function (href) {
+                url_parts = href.split('/')
+                if (!currSeriesEpisodes || currSeriesEpisodes.episodes.indexOf(url_parts[url_parts.length - 1]) < 0) {
+                    episodesToDownload.push(href);
+                }
+            });
+            searchSeriesUrl(urls, index + 1, callback);
+        });
+    });
+}
 
 function searchSeriesUrl(urls, index, callback) {
     if (index >= urls.length) {
@@ -42,24 +61,10 @@ function searchSeriesUrl(urls, index, callback) {
                         seasonElementsToLoad.push(seasonElements[index]);
                     }
                 });
-                promise.map(seasonElementsToLoad, e => e.findElements(By.css("a.episode"))).then(function (episodeElementsOfSeasons) {
-                    var allEpisodeElements = [];
-                    episodeElementsOfSeasons.forEach(function (episodeElements) {
-                        allEpisodeElements = allEpisodeElements.concat(episodeElements);
-                    });
-                    promise.map(allEpisodeElements, e => e.getAttribute('href')).then(function (hrefs) {
-                        var url_parts = hrefs[0].split('/'),
-                            currSeriesEpisodes = seriesEpisodes[url_parts[url_parts.length - 2]];
-                        hrefs.forEach(function (href) {
-                            url_parts = href.split('/')
-                            if (!currSeriesEpisodes || currSeriesEpisodes.episodes.indexOf(url_parts[url_parts.length - 1]) < 0) {
-                                episodesToDownload.push(href);
-                            }
-                        });
-                        searchSeriesUrl(urls, index + 1, callback);
-                    });
-                });
+                selectEpisodesElements(seasonElementsToLoad, urls, index, callback);
             });
+        }, function () {
+            selectEpisodesElements(seasonElements, urls, index, callback);
         });
     });
 }
@@ -67,6 +72,7 @@ function searchSeriesUrl(urls, index, callback) {
 driver.get('https://www.crunchyroll.com/');
 driver.wait(until.titleContains('Crunchyroll'), 20000).then(function () {
     searchSeriesUrl(args, 0, function () {
+        console.log('episodesToDownload', episodesToDownload);
         episodeSearch.searchUrls(driver, episodesToDownload, function () {
             driver.close().then(function () {
                 driver.quit();
