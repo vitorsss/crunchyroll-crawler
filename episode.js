@@ -59,11 +59,14 @@ function searchUrls(driver, urls, index, callback) {
         }
         var fileName = path.join(dirName, url_parts[url_parts.length - 1]).toString();
 
-        vilosConfig.streams.forEach(function (stream) {
-            if (stream.hardsub_lang === config.preferedLang) {
-                masterIndexUrl = decode(decodeURIComponent(stream.url));
-            }
-        });
+		for (var stream in vilosConfig.streams) {
+			stream = vilosConfig.streams[stream];
+			if (stream.hardsub_lang === config.preferedLang && config.ignoreStreamFormat.indexOf(stream.format) < 0) {
+				console.log(stream);
+				masterIndexUrl = decode(decodeURIComponent(stream.url));
+				break;
+			}
+		}
         request.get(masterIndexUrl, {}, function (err, response) {
             if (err) {
                 throw err;
@@ -74,7 +77,7 @@ function searchUrls(driver, urls, index, callback) {
                     resolution,
                     curResolution,
                     indexUrl,
-                    metadataFile = vilosConfig.metadata.id + '.metadata',
+                    metadataFile = 'temp/' + vilosConfig.metadata.id + '.metadata',
                     metadataContent = [],
                     adChapterOffset = parseInt(config.adChapterOffset || "20000");
                 for (i = 0; i < lines.length; i += 1) {
@@ -123,6 +126,11 @@ function searchUrls(driver, urls, index, callback) {
 
 module.exports = {
     searchUrls: function (driver, urls, driverCallback, callback) {
+		try {
+			fs.mkdirSync('temp');
+		} catch (e) {
+
+		}
         searchUrls(driver, urls, 0, function () {
             if (driverCallback) {
                 driverCallback();

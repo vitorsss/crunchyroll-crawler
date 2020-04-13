@@ -1,5 +1,6 @@
 {
     "preferedLang": "ptBR",
-    "ffmpegPath": "D:\\install\\ffmpeg-3.2.4-win64-static\\bin\\ffmpeg.exe",
-    "outdir": "D:\\Videos"
+    "ffmpegPath": "D:\\Program Files\\ffmpeg\\bin\\ffmpeg.exe",
+    "outdir": "E:\\Videos",
+	"ignoreStreamFormat": ["adaptive_dash"]
 }
