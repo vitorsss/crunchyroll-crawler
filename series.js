@@ -8,7 +8,8 @@ const args = process.argv.slice(2),
     driver = new Builder().forBrowser('chrome').setChromeOptions(new chrome.Options().headless().windowSize({width: 640, height: 480})).build(),
     episodeSearch = require('./episode.js'),
     seriesEpisodes = {},
-    episodesToDownload = [];
+    episodesToDownload = [],
+    crunchyroll_base_url = 'https://www.crunchyroll.com/';
 
 function findRecursiveEpisodes(episodes, actualPath) {
     fs.readdirSync(actualPath).forEach(function (file) {
@@ -51,7 +52,11 @@ function searchSeriesUrl(urls, index, callback) {
     if (index >= urls.length) {
         return callback();
     }
-    driver.get(urls[index]);
+    var url = urls[index];
+    if (url.indexOf('http') != 0) {
+        url = crunchyroll_base_url + url;
+    }
+    driver.get(url);
     driver.findElements(By.css("li.season")).then(function (seasonElements) {
         promise.map(seasonElements, e => e.findElement(By.css("a.season-dropdown"))).then(function (seasonDropDownElements) {
             promise.map(seasonDropDownElements, e => e.getAttribute('title')).then(function (seasonTitles) {
@@ -69,7 +74,7 @@ function searchSeriesUrl(urls, index, callback) {
     });
 }
 
-driver.get('https://www.crunchyroll.com/');
+driver.get(crunchyroll_base_url);
 driver.wait(until.titleContains('Crunchyroll'), 20000).then(function () {
     searchSeriesUrl(args, 0, function () {
         console.log('episodesToDownload', episodesToDownload);
